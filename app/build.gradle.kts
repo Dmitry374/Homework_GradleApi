@@ -1,6 +1,10 @@
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    `maven-publish`
+    id("com.github.triplet.play") version "3.11.0"
 }
 
 android {
@@ -33,6 +37,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    publishing {
+        singleVariant("release") {
+            publishApk()
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +55,25 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = "com.example.homework_gradleapi"
+            artifactId = "app"
+            version = "1.1"
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+}
+
+play {
+    serviceAccountCredentials.set(file("android_publisher.json"))
+    releaseName.set("My test release name")
+    track.set("internal")
+    releaseStatus.set(ReleaseStatus.DRAFT)
+    defaultToAppBundles.set(true)
 }
